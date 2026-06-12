@@ -1,0 +1,57 @@
+# Build directories
+build/
+cmake-build-debug/
+cmake-build-release/
+cmake-build-*/
+
+# Executables
+*.exe
+*.out
+*.app
+huffman
+huffman.exe
+
+# Compiled files
+*.o
+*.obj
+*.bin
+*.huff
+*.so
+*.dll
+*.dylib
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test files
+test.txt
+output.txt
+restored.txt
+*.bin
+*.huff
+
+# Experimental files
+experiments/*.bin
+experiments/*.huff
+*.txt
+experiment
+speed_out.txt
