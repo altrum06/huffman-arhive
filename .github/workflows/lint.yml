@@ -1,18 +1,16 @@
-  cat > .github/workflows/lint.yml << 'EOF'
-  name: Lint
+name: Lint
 
-  on: [push, pull_request]
+on: [push, pull_request]
 
-  jobs:
-    lint:
-      runs-on: ubuntu-latest
-
-      steps:
-        - uses: actions/checkout@v4
-
-        - name: Install cppcheck
-          run: sudo apt-get update && sudo apt-get install -y cppcheck
-
-        - name: Run cppcheck
-          run: cppcheck --enable=all --suppress=missingIncludeSystem src/ tests/ || true
-    EOF
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install cppcheck
+      run: sudo apt-get update && sudo apt-get install -y cppcheck
+    
+    - name: Run cppcheck
+      run: cppcheck --enable=all --suppress=missingIncludeSystem src/ tests/ || true
