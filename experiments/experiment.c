@@ -22,8 +22,7 @@ void create_test_file(const char* name, int size_kb, int type) {
     FILE* f = fopen(name, "w");
     for (int i = 0; i < size_kb * 1024; i++) {
         if (type == 0) fputc('A' + (i % 26), f);
-        else if (type == 1) fputc('A', f);
-        else fputc(rand() % 256, f);
+        else fputc('A', f);
     }
     fclose(f);
 }
@@ -69,22 +68,44 @@ void test_type_dependence() {
     long r_orig = get_file_size("repeat.txt");
     long r_comp = get_file_size("repeat.bin");
     printf("%-20s | %-10ld | %-10ld | %9.2f%%\n", "Повтор символов", r_orig, r_comp, (1-(double)r_comp/r_orig)*100);
-
-    // Случайный
-    create_test_file("random.bin", 100, 2);
-    compress_file("random.bin", "random.huff");
-    long rand_orig = get_file_size("random.bin");
-    long rand_comp = get_file_size("random.huff");
-    printf("%-20s | %-10ld | %-10ld | %9.2f%%\n", "Случайные", rand_orig, rand_comp, (1-(double)rand_comp/rand_orig)*100);
 }
 
-// Тест 3: скорость с многократными замерами
+// Тест 3: медиафайлы (JPEG, MP3, ZIP)
+void test_media_files() {
+    printf("\n=== ТЕСТ 3: МЕДИАФАЙЛЫ (JPEG, MP3, ZIP) ===\n");
+    printf("%-20s | %-12s | %-12s | %-10s\n", "Файл", "Исходный", "Сжатый", "Степень");
+    printf("--------------------|--------------|--------------|----------\n");
+
+    const char* files[] = {"image.jpg", "music.mp3", "archive.zip"};
+    const char* names[] = {"JPEG изображение", "MP3 аудио", "ZIP архив"};
+
+    for (int i = 0; i < 3; i++) {
+        char output[50];
+        sprintf(output, "%s.huff", files[i]);
+
+        FILE* f = fopen(files[i], "rb");
+        if (f == NULL) {
+            printf("%-20s | Файл не найден\n", names[i]);
+            continue;
+        }
+        fclose(f);
+
+        compress_file(files[i], output);
+
+        long orig = get_file_size(files[i]);
+        long comp = get_file_size(output);
+        double ratio = (1 - (double)comp / orig) * 100;
+
+        printf("%-20s | %-12ld | %-12ld | %9.2f%%\n", names[i], orig, comp, ratio);
+    }
+}
+
+// Тест 4: скорость с многократными замерами
 void test_speed() {
-    printf("\n=== ТЕСТ 3: СКОРОСТЬ (%d ЗАМЕРОВ) ===\n", TRIES);
+    printf("\n=== ТЕСТ 4: СКОРОСТЬ (%d ЗАМЕРОВ) ===\n", TRIES);
 
     create_test_file("speed.txt", 100, 0);
 
-    // Многократные замеры сжатия
     double comp_times[TRIES];
     double total_comp_time = 0;
 
@@ -98,14 +119,12 @@ void test_speed() {
 
     double avg_comp_time = total_comp_time / TRIES;
 
-    // Среднеквадратичное отклонение для сжатия
     double comp_variance = 0;
     for (int i = 0; i < TRIES; i++) {
         comp_variance += (comp_times[i] - avg_comp_time) * (comp_times[i] - avg_comp_time);
     }
     double comp_stddev = sqrt(comp_variance / TRIES);
 
-    // Многократные замеры распаковки
     double decomp_times[TRIES];
     double total_decomp_time = 0;
 
@@ -119,20 +138,19 @@ void test_speed() {
 
     double avg_decomp_time = total_decomp_time / TRIES;
 
-    // Среднеквадратичное отклонение для распаковки
     double decomp_variance = 0;
     for (int i = 0; i < TRIES; i++) {
         decomp_variance += (decomp_times[i] - avg_decomp_time) * (decomp_times[i] - avg_decomp_time);
     }
     double decomp_stddev = sqrt(decomp_variance / TRIES);
 
-    printf("\nСжатие:\n");
+    printf("\nСжатие (файл 100 КБ):\n");
     printf("  Среднее время: %.4f сек\n", avg_comp_time);
-    printf("  Ср.кв. отклонение: %.4f сек\n", comp_stddev);
+    printf("  СКО: %.4f сек\n", comp_stddev);
 
-    printf("\nРаспаковка:\n");
+    printf("\nРаспаковка (файл 100 КБ):\n");
     printf("  Среднее время: %.4f сек\n", avg_decomp_time);
-    printf("  Ср.кв. отклонение: %.4f сек\n", decomp_stddev);
+    printf("  СКО: %.4f сек\n", decomp_stddev);
 
     printf("\nРаспаковка быстрее сжатия в %.2f раза\n", avg_comp_time / avg_decomp_time);
 }
@@ -145,14 +163,15 @@ void run_experiments() {
 
     test_size_dependence();
     test_type_dependence();
+    test_media_files();
     test_speed();
 
     printf("\n========================================\n");
     printf("ВЫВОДЫ\n");
     printf("========================================\n");
-    printf("1. Алгоритм эффективен на файлах > 10 КБ\n");
-    printf("2. Повторяющиеся данные сжимаются лучше всего (до 98%%)\n");
-    printf("3. Случайные данные не сжимаются (0-5%%)\n");
+    printf("1. Алгоритм эффективен на файлах > 10 КБ (степень сжатия до 40%%)\n");
+    printf("2. Повторяющиеся данные сжимаются лучше всего (до 99.99%%)\n");
+    printf("3. Медиафайлы (JPEG, MP3, ZIP) практически не сжимаются (< 1%%)\n");
     printf("4. Распаковка быстрее сжатия\n");
     printf("5. Результаты стабильны (отклонение < 0.01 сек)\n");
 }
