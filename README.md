@@ -85,8 +85,8 @@ huffman-arhive/
 
 
 # 1. Клонируйте репозиторий
-git clone https://github.com/altrum06/huffman-archive.git
-cd huffman-archive
+git clone https://github.com/altrum06/huffman-arhive.git
+cd huffman-arhive
 
 # 2. Создайте папку для сборки и перейдите в неё
 mkdir build && cd build
