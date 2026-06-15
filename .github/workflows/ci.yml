@@ -7,36 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake gcc
-
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build app
+      - name: Build
         run: cmake --build build --target huffman_app
-
-      - name: Build tests
-        run: cmake --build build --target huffman_tests
-
-      - name: Run tests
-        run: ctest --test-dir build -R huffman_test --output-on-failure
-
+      - name: Build and run tests
+        run: |
+          cmake --build build --target huffman_run_tests
+          ./build/huffman_run_tests
 
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build app
+      - name: Build
         run: cmake --build build --target huffman_app --config Release
-
-      - name: Build tests
-        run: cmake --build build --target huffman_tests --config Release
-
-      - name: Run tests
-        run: ctest --test-dir build -C Release -R huffman_test --output-on-failure
+      - name: Build and run tests
+        run: |
+          cmake --build build --target huffman_run_tests --config Release
+          .\build\Release\huffman_run_tests.exe
