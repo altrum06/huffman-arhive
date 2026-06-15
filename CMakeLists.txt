@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 include(FetchContent)
+
 FetchContent_Declare(
     cmocka
     GIT_REPOSITORY https://gitlab.com/cmocka/cmocka.git
@@ -12,6 +13,7 @@ FetchContent_Declare(
 )
 set(CMOCKA_INSTALL OFF)
 set(CMOCKA_BUILD_TESTS OFF)
+set(CMOCKA_BUILD_EXAMPLES OFF)
 FetchContent_MakeAvailable(cmocka)
 
 add_executable(huffman_app
@@ -57,5 +59,6 @@ target_compile_options(run_tests PRIVATE
 
 target_link_libraries(run_tests PRIVATE cmocka::cmocka)
 
+# Включаем тестирование только для нашей цели (не для CMocka)
 enable_testing()
 add_test(NAME huffman_test COMMAND run_tests)

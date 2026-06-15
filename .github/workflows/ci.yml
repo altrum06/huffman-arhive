@@ -16,7 +16,7 @@ jobs:
     - name: Build and run tests
       run: |
         cmake --build build --target run_tests
-        cd build && ctest --output-on-failure
+        ./build/run_tests
 
   build-windows:
     runs-on: windows-latest
@@ -29,4 +29,4 @@ jobs:
     - name: Build and run tests
       run: |
         cmake --build build --target run_tests --config Release
-        cd build && ctest --output-on-failure -C Release
+        .\build\Release\run_tests.exe
