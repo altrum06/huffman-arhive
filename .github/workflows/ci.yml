@@ -29,4 +29,5 @@ jobs:
       - name: Build and run tests
         run: |
           cmake --build build --target huffman_run_tests --config Release
+          Copy-Item build\_deps\cmocka-build\src\Release\cmocka.dll build\Release\
           .\build\Release\huffman_run_tests.exe
