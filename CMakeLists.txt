@@ -34,18 +34,22 @@ target_compile_options(huffman_app PRIVATE
     $<$<C_COMPILER_ID:MSVC>:/W4>
 )
 
-add_executable(run_tests
-    tests/test_tree.c
-    tests/test_queue.c
-    tests/test_bits.c
-    tests/test_codes.c
-    tests/test_archive.c
-    tests/run_all_tests.c
-    src/priority_queue.c
-    src/huffman_tree.c
-    src/bit_io.c
-    src/compressor.c
+add_executable(huffman_tests
+        tests/test_tree.c
+        tests/test_queue.c
+        tests/test_bits.c
+        tests/test_codes.c
+        tests/test_archive.c
+        tests/run_all_tests.c
+        src/priority_queue.c
+        src/huffman_tree.c
+        src/bit_io.c
+        src/compressor.c
 )
+
+target_link_libraries(huffman_tests cmocka)
+
+add_test(NAME huffman_test COMMAND huffman_tests)
 
 target_include_directories(run_tests PRIVATE
     src

@@ -6,27 +6,37 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y cmake gcc
-    - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-    - name: Build
-      run: cmake --build build --target huffman_app
-    - name: Build and run tests
-      run: |
-        cmake --build build --target run_tests
-        ./build/run_tests
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake gcc
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build app
+        run: cmake --build build --target huffman_app
+
+      - name: Build tests
+        run: cmake --build build --target huffman_tests
+
+      - name: Run tests
+        run: ctest --test-dir build -R huffman_test --output-on-failure
+
 
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-    - name: Build
-      run: cmake --build build --target huffman_app --config Release
-    - name: Build and run tests
-      run: |
-        cmake --build build --target run_tests --config Release
-        .\build\Release\run_tests.exe
+      - uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build app
+        run: cmake --build build --target huffman_app --config Release
+
+      - name: Build tests
+        run: cmake --build build --target huffman_tests --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release -R huffman_test --output-on-failure
