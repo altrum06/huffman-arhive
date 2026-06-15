@@ -1,51 +1,61 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(huffman_archive)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Основная программа
+include(FetchContent)
+FetchContent_Declare(
+    cmocka
+    GIT_REPOSITORY https://gitlab.com/cmocka/cmocka.git
+    GIT_TAG cmocka-1.1.7
+)
+set(CMOCKA_INSTALL OFF)
+set(CMOCKA_BUILD_TESTS OFF)
+FetchContent_MakeAvailable(cmocka)
+
 add_executable(huffman_app
     src_main/main.c
-    src/queue/priority_queue.c
-    src/tree/huffman_tree.c
-    src/bits/bit_io.c
-    src/archive/compressor.c
+    src/priority_queue.c
+    src/huffman_tree.c
+    src/bit_io.c
+    src/compressor.c
 )
 
 target_include_directories(huffman_app PRIVATE
     src
-    src/queue
-    src/tree
-    src/bits
-    src/archive
 )
 
-target_compile_options(huffman_app PRIVATE -Wall -Wextra)
+target_compile_options(huffman_app PRIVATE
+    $<$<C_COMPILER_ID:GNU>:-Wall -Wextra>
+    $<$<C_COMPILER_ID:Clang>:-Wall -Wextra>
+    $<$<C_COMPILER_ID:MSVC>:/W4>
+)
 
-# Тесты
 add_executable(run_tests
     tests/test_tree.c
     tests/test_queue.c
     tests/test_bits.c
     tests/test_codes.c
     tests/test_archive.c
-    src/queue/priority_queue.c
-    src/tree/huffman_tree.c
-    src/bits/bit_io.c
-    src/archive/compressor.c
+    tests/run_all_tests.c
+    src/priority_queue.c
+    src/huffman_tree.c
+    src/bit_io.c
+    src/compressor.c
 )
 
 target_include_directories(run_tests PRIVATE
     src
-    src/queue
-    src/tree
-    src/bits
-    src/archive
 )
 
-target_compile_options(run_tests PRIVATE -Wall -Wextra)
+target_compile_options(run_tests PRIVATE
+    $<$<C_COMPILER_ID:GNU>:-Wall -Wextra>
+    $<$<C_COMPILER_ID:Clang>:-Wall -Wextra>
+    $<$<C_COMPILER_ID:MSVC>:/W4>
+)
 
-# Включить тестирование
+target_link_libraries(run_tests PRIVATE cmocka::cmocka)
+
 enable_testing()
 add_test(NAME huffman_test COMMAND run_tests)

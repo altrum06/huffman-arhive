@@ -56,3 +56,14 @@ experiments/*.huff
 experiment
 speed_out.txt
 Makefile
+
+# Experiment build artifacts
+experiments/CMakeFiles/
+experiments/_deps/
+experiments/CTestTestfile.cmake
+experiments/cmake_install.cmake
+experiments/compile_commands.json
+experiments/CPackConfig.cmake
+experiments/CPackSourceConfig.cmake
+experiments/huffman_app
+experiments/run_tests

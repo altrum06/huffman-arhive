@@ -1,85 +1,62 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "../src/tree/huffman_tree.h"
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#include "../src/huffman_tree.h"
 
-// Проверяем создание одного узла дерева
-void test_create_node() {
-    printf("Тест создание узла\n");
-
-    HuffmanNode* node = create_node('A', 10);
-
-    // Проверяем, что узел создан и поля заполнены правильно
-    assert(node != NULL);
-    assert(node->symbol == 'A');
-    assert(node->frequency == 10);
-    assert(node->left == NULL);
-    assert(node->right == NULL);
-
-    free(node);
-
-    printf("Прошел успешно\n");
+// Проверка создания узла и аксессоров
+static void test_create_node(void **state) {
+    (void)state;
+    HuffmanNode *node = create_node('A', 10);
+    assert_non_null(node);
+    assert_int_equal(huffman_node_get_symbol(node), 'A');
+    assert_int_equal(huffman_node_get_frequency(node), 10);
+    assert_int_equal(huffman_node_is_leaf(node), 1);
+    free_tree(node);
 }
 
-// Проверяем построение дерева из двух разных символов
-void test_build_tree_two_symbols() {
-    printf("Тест дерево из двух символов\n");
-
-    int freqs[256] = {0};
-    freqs['A'] = 5;
-    freqs['B'] = 3;
-
-    HuffmanNode* root = build_tree(freqs);
-
-    // У дерева из двух символов должен быть корень и два дочерних узла
-    assert(root != NULL);
-    assert(root->left != NULL && root->right != NULL);
-
+// Проверка построения дерева из двух символов
+static void test_build_tree_two_symbols(void **state) {
+    (void)state;
+    int frequencies[256] = {0};
+    frequencies['A'] = 5;
+    frequencies['B'] = 3;
+    HuffmanNode *root = build_tree(frequencies);
+    assert_non_null(root);
+    assert_int_equal(huffman_node_is_leaf(root), 0);
+    assert_non_null(huffman_node_get_left(root));
+    assert_non_null(huffman_node_get_right(root));
     free_tree(root);
-
-    printf("Прошел успешно\n");
 }
 
-// Проверяем случай, когда в файле есть только один уникальный символ
-void test_build_tree_one_symbol() {
-    printf("Тест дерево из одного символа\n");
-
-    int freqs[256] = {0};
-    freqs['A'] = 10;
-
-    HuffmanNode* root = build_tree(freqs);
-
-    // В этом случае дерево состоит только из одного узла
-    assert(root != NULL);
-    assert(root->left == NULL && root->right == NULL);
-    assert(root->symbol == 'A');
-    assert(root->frequency == 10);
-
+// Проверка дерева из одного символа (особый случай)
+static void test_build_tree_one_symbol(void **state) {
+    (void)state;
+    int frequencies[256] = {0};
+    frequencies['A'] = 10;
+    HuffmanNode *root = build_tree(frequencies);
+    assert_non_null(root);
+    assert_int_equal(huffman_node_is_leaf(root), 1);
+    assert_int_equal(huffman_node_get_symbol(root), 'A');
+    assert_int_equal(huffman_node_get_frequency(root), 10);
     free_tree(root);
-
-    printf("Прошел успешно\n");
 }
 
-// Проверяем случай пустого файла, когда частот нет
-void test_build_tree_empty() {
-    printf("Тест пустое дерево\n");
-
-    int freqs[256] = {0};
-    HuffmanNode* root = build_tree(freqs);
-
-    // Для пустого набора частот дерево построить нельзя
-    assert(root == NULL);
-
-    printf("Прошел успешно\n");
+// Проверка, что пустая таблица частот возвращает NULL
+static void test_build_tree_empty(void **state) {
+    (void)state;
+    int frequencies[256] = {0};
+    HuffmanNode *root = build_tree(frequencies);
+    assert_null(root);
 }
 
-// Запускаем все тесты для дерева Хаффмана
-void tree_tests_run() {
-    printf("\nТесты дерева Хаффмана\n");
-
-    test_create_node();
-    test_build_tree_two_symbols();
-    test_build_tree_one_symbol();
-    test_build_tree_empty();
+// Запуск всех тестов дерева Хаффмана
+int run_tree_tests(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_create_node),
+        cmocka_unit_test(test_build_tree_two_symbols),
+        cmocka_unit_test(test_build_tree_one_symbol),
+        cmocka_unit_test(test_build_tree_empty),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
-

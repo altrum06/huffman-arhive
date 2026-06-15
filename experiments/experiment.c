@@ -1,5 +1,5 @@
 #include "experiment.h"
-#include "../src/archive/compressor.h"
+#include "../src/compressor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -61,13 +61,6 @@ void test_type_dependence() {
     long t_orig = get_file_size("text.txt");
     long t_comp = get_file_size("text.bin");
     printf("%-20s | %-10ld | %-10ld | %9.2f%%\n", "Текст", t_orig, t_comp, (1-(double)t_comp/t_orig)*100);
-
-    // Повтор
-    create_test_file("repeat.txt", 100, 1);
-    compress_file("repeat.txt", "repeat.bin");
-    long r_orig = get_file_size("repeat.txt");
-    long r_comp = get_file_size("repeat.bin");
-    printf("%-20s | %-10ld | %-10ld | %9.2f%%\n", "Повтор символов", r_orig, r_comp, (1-(double)r_comp/r_orig)*100);
 }
 
 // Тест 3: медиафайлы (JPEG, MP3, ZIP)
@@ -155,6 +148,58 @@ void test_speed() {
     printf("\nРаспаковка быстрее сжатия в %.2f раза\n", avg_comp_time / avg_decomp_time);
 }
 
+// Тест 5: реальные текстовые файлы small.txt и large.txt
+void test_real_files() {
+    printf("\n=== ТЕСТ 5: РЕАЛЬНЫЕ ФАЙЛЫ (%d ЗАМЕРОВ) ===\n", TRIES);
+
+    const char *files[] = {"small.txt", "large.txt"};
+    const char *names[] = {"Маленький текст", "Большой текст"};
+
+    for (int i = 0; i < 2; i++) {
+        FILE *f = fopen(files[i], "rb");
+        if (f == NULL) {
+            printf("%-20s | Файл не найден\n", names[i]);
+            continue;
+        }
+        fclose(f);
+
+        char output[50];
+        sprintf(output, "%s.huff", files[i]);
+
+        long orig = get_file_size(files[i]);
+
+        // Первый проход — сжатие для получения размера
+        int result = compress_file(files[i], output);
+        if (result != COMPRESS_SUCCESS) {
+            printf("%-20s | Ошибка сжатия\n", names[i]);
+            continue;
+        }
+        long comp = get_file_size(output);
+        double ratio = (1 - (double)comp / orig) * 100;
+
+        // Многократные замеры времени
+        double times[TRIES];
+        double total = 0;
+        for (int j = 0; j < TRIES; j++) {
+            clock_t start = clock();
+            compress_file(files[i], output);
+            clock_t end = clock();
+            times[j] = (double)(end - start) / CLOCKS_PER_SEC;
+            total += times[j];
+        }
+
+        double avg = total / TRIES;
+        double variance = 0;
+        for (int j = 0; j < TRIES; j++) {
+            variance += (times[j] - avg) * (times[j] - avg);
+        }
+        double stddev = sqrt(variance / TRIES);
+
+        printf("%-20s | %-12ld | %-12ld | %9.2f%%  ср: %.4f сек  ско: %.4f сек\n",
+               names[i], orig, comp, ratio, avg, stddev);
+    }
+}
+
 // Запуск всех тестов
 void run_experiments() {
     printf("\n========================================\n");
@@ -164,16 +209,16 @@ void run_experiments() {
     test_size_dependence();
     test_type_dependence();
     test_media_files();
+    test_real_files();
     test_speed();
 
     printf("\n========================================\n");
     printf("ВЫВОДЫ\n");
     printf("========================================\n");
     printf("1. Алгоритм эффективен на файлах > 10 КБ (степень сжатия до 40%%)\n");
-    printf("2. Повторяющиеся данные сжимаются лучше всего (до 99.99%%)\n");
-    printf("3. Медиафайлы (JPEG, MP3, ZIP) практически не сжимаются (< 1%%)\n");
-    printf("4. Распаковка быстрее сжатия\n");
-    printf("5. Результаты стабильны (отклонение < 0.01 сек)\n");
+    printf("2. Медиафайлы (JPEG, MP3, ZIP) практически не сжимаются (< 1%%)\n");
+    printf("3. Распаковка быстрее сжатия\n");
+    printf("4. Результаты стабильны (отклонение < 0.01 сек)\n");
 }
 
 int main() {

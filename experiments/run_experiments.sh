@@ -6,7 +6,7 @@ echo "Запуск экспериментов"
 cd /mnt/c/Users/Adam/CLionProjects/huffman-arhive/experiments
 
 # Компиляция
-gcc -o experiment experiment.c ../src/archive/compressor.c ../src/tree/huffman_tree.c ../src/queue/priority_queue.c ../src/bits/bit_io.c -I.. -lm
+gcc -o experiment experiment.c ../src/compressor.c ../src/huffman_tree.c ../src/priority_queue.c ../src/bit_io.c -I.. -lm
 
 # Запуск
 ./experiment
